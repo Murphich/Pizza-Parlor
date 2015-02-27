@@ -37,7 +37,7 @@ function scene:create(e)
     bg.x = _screen.center.x
     bg.y = _screen.center.y
     --fill background with gradient
-    bg.fill = brownGradientFill
+    bg:setFillColor(brownGradientFill)
     
     --Large image of the pizza
     --Set scale to full width and 180 height
@@ -63,7 +63,7 @@ function scene:create(e)
     shadowText.x = titleText.x + 1
     shadowText.y = titleText.y + 1
     --black for shadow effect
-    shadowText.fill = {0,0,0,1}
+    shadowText:setFillColor(0,0,0,1)
 
     --Outline decription
     font = Prefs.body.font
@@ -107,7 +107,7 @@ function scene:create(e)
     self.view:insert(backBtn)
     self.view:insert(buyBtn)
 end
-
+--Implement show scene
 function scene:show(e)
     if(e.phase == "will")then
         --create function to perform task
@@ -125,12 +125,13 @@ function scene:show(e)
     end
 end
 
+--Implement hide scene
 function scene:hide(e)
     if(e.phase == "will")then
         composer.removeScene("detail")
     end
 end
-
+--add listeners
 scene:addEventListener("create", scene)
 scene:addEventListener("show", scene)
 scene:addEventListener("hide", scene)

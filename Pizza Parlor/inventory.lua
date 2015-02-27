@@ -5,11 +5,11 @@ local scene = composer.newScene()
 --initiate widget object
 local widget = require ("widget")
 --initiate Pizza Database
-local pizzaDb = require ("pizzaDb")
---Import Prefs module
+local pizzaInven = require ("pizzaDb")
+
+--local sql = require ("sqlite3")--Import Prefs module
+
 local Prefs = require("Prefs")
---local json = require ("json")
---local t = json.decode( jsonFile( "pizzaDb.json" ) )
 
 --Declare Variables
 local navHeight = Prefs.nav.height
@@ -25,10 +25,12 @@ local function onRowRender(e)
     local rowIndex = row.index
     local rowLabel
     local rowThumbnail
+    local rowDel
     
     --invoke parameters
     rowLabel = e.row.params.title
     rowThumbnail = e.row.params.thumbnail
+    rowDel = e.row.params.del
     
     --display and position thumbnail pic
     row.rowThumbnail = display.newImageRect(rowThumbnail, 60, 60)
@@ -43,10 +45,21 @@ local function onRowRender(e)
     row.rowText.anchorX = 0
     row.rowText.x = row.rowThumbnail.width + row.rowThumbnail.x + Prefs.margin
     row.rowText.y = row.height * 0.5
-    row.rowText.fill = {0,0,0,1}
-    
+    row.rowText:setFillColor(0,0,0,1)
+        
+        --designed for adm in use, to delete rows(change alpha to 1 to see what would essitally happen)
+        row.rowDel = display.newText("Delete", 0, 0, "Helvetica", 12)
+        row.rowDel.anchorX = 0
+        row.rowDel.x = row.rowThumbnail.width + row.rowThumbnail.x + Prefs.margin + 180
+        row.rowDel.y = row.height * 0.5
+        row.rowDel:setFillColor(0,0,0,1)
+        row.rowDel.alpha = 0
+        
+--group thumbnails and text into rows
     row:insert(row.rowThumbnail)
     row:insert(row.rowText)
+    row:insert(row.rowDel)
+  
 end
 
 --Create function for touching a row
@@ -65,7 +78,11 @@ local function onRowTouch(e)
         end
     end
 end
-
+--delete row function
+local function onRowDel(e)
+    print ("Delete hit")
+end
+--creta scene
 function scene:create(e)
     local brownGradientFill ={
         type = "gradient",
@@ -82,12 +99,12 @@ function scene:create(e)
     bg.x = _screen.center.x
     bg.y = _screen.center.y
     --fill background with gradient
-    bg.fill = brownGradientFill
+    bg:setFillColor(brownGradientFill)
     
     --create a button to return to the menu and locate it
     local font = Prefs.menu.font
     local size = Prefs.menu.size
-    menuBtn = display.newText("Menu", 0,0, font, size)
+    menuBtn = display.newText("Back", 0,0, font, size)
     menuBtn.anchorX = 0
     menuBtn.x = Prefs.margin
     menuBtn.y = navHeight * 0.5
@@ -101,30 +118,38 @@ function scene:create(e)
         --method invoked when a row is rendered
         onRowRender = onRowRender,
         --invoke method when row is touched
-        onRowTouch = onRowTouch
+        onRowTouch = onRowTouch,
+        
+        --onRowDel = onRowDel
     })
-    
+        
     --insert into scene so transition scenes will operate
     self.view:insert(bg)
     self.view:insert(tableView)
     self.view:insert(menuBtn)
     
     --Populate the table with rows of table info
-    for i = 1, #pizzaDb do
-        local pizza = pizzaDb[i].name
-        local thumbnail = pizzaDb[i].thumbnail
+    for i = 1, #pizzaInven do
+        local name = pizzaInven[i].name
+        local thumbnail = pizzaInven[i].thumbnail
+        local dets = pizzaInven[i].description
+        --enter delete button
+        --local delete = pizzaInven[i].del
+        --pizzaInven[i].delete = false
         
         local params = {
             isCategory = false,
             rowHeight = 60,
             rowColor = {
                 -- keep row white
-                default = {1,1,1,1}, over = {1,1,1,1}
+                default = {1,1,1,1}, over = {0,1,1,1}
             },
             --Table to hold all data from pizzaDb
             params = {
-                title = pizza,
+                title = name,
                 thumbnail = thumbnail,
+                description = dets,
+                --del = delete,
                 index = i
             }
         }
